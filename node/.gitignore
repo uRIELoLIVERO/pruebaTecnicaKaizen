@@ -1,0 +1,43 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Logs
+logs/
+*.log
+.log.
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# dotenv environment variables file
+.env
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# React
+build/
+public/static/
+
+# Production
+dist/
+build/
+
+# Sequelize migrations
+migrations/
+seeders/
+
+# MySQL
+*.sql
+
+# Material UI cache
+.mui-cache/
