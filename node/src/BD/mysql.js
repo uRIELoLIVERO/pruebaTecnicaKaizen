@@ -1,84 +1,144 @@
-const mysql = require('mysql');
-const config = require('../config');
+const Sequelize = require('sequelize')
+const config = require('../config')
 
-const dbconfig = {
-    host : config.mysql.host,
-    user: config.mysql.user,
-    password: config.mysql.password,
-    database: config.mysql.database
+// sequelize, parametros de conexion
+const sequelize = new Sequelize(
+  config.mysql.database,
+  config.mysql.user,
+  config.mysql.password,
+  {
+    host: config.mysql.host,
+    dialect: 'mysql',
+    logging: false
+  }
+)
+
+// modelo de Usuario
+const User = sequelize.define('users', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  username: {
+    type: Sequelize.STRING(50),
+    allowNull: false
+  },
+  email: {
+    type: Sequelize.STRING(100),
+    allowNull: false,
+    unique: true
+  },
+  password: {
+    type: Sequelize.STRING(255),
+    allowNull: false
+  },
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW,
+    onUpdate: Sequelize.literal('CURRENT_TIMESTAMP')
+  },
+  is_deleted: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false
+  }
+}, {
+  timestamps: true,
+  updatedAt: 'updatedAt',
+  createdAt: 'createdAt'
+})
+// Definir el modelo de Tarea
+const Task = sequelize.define('tasks', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  title: {
+    type: Sequelize.STRING(100),
+    allowNull: false
+  },
+  description: {
+    type: Sequelize.TEXT
+  },
+  status: {
+    type: Sequelize.ENUM('pendiente', 'en_progreso', 'completada'),
+    defaultValue: 'pendiente'
+  },
+  user_id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW
+  },
+  is_deleted: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false
+  }
+}, {
+  timestamps: true,
+  updatedAt: 'updatedAt',
+  createdAt: 'createdAt'
+})
+
+// Definir relaciones
+User.hasMany(Task, { foreignKey: 'user_id' })
+Task.belongsTo(User, { foreignKey: 'user_id' })
+
+sequelize.authenticate()
+  .then(() => {
+    console.log('DB Conectada')
+  })
+  .catch(error => {
+    console.log(`ERROR DE CONEXION: ${error}`)
+  })
+
+async function findAll (table) {
+  return await table.findAll({ where: { is_deleted: false } })
 }
 
-let conexion;
-
-function conMysql(){
-    conexion = mysql.createConnection(dbconfig)
-
-    conexion.connect((err) => {
-        if(err){
-            console.log('[db err]', err)
-            setTimeout(conMysql, 200)
-        } else {
-            console.log('DB conectada')
-        }
-    })
-
-    conexion.on('error', err =>{
-        console.log('[db err]', err)
-        if (err.code === `PROTOCOL_CONNECTION_LOST`){
-            conMysql()
-        } else {
-            throw new err;
-        }
-    })
+async function findOne (table, id) {
+  return await table.findOne({ where: { id, is_deleted: false } })
 }
 
-conMysql()
-
-function todos(tabla){
-    return new Promise( (resolve, reject) => {
-        conexion.query(`SELECT * FROM ${tabla} WHERE is_deleted = FALSE`, (error, result) => {
-            return error ? reject(error) : resolve(result)
-        })
-    })
+async function query (table, conditions) {
+  return await table.findOne({ where: { ...conditions, is_deleted: false } })
 }
 
-function uno(tabla, id){
-    return new Promise( (resolve, reject) => {
-        conexion.query(`SELECT * FROM ${tabla} WHERE id=${id}`, (error, result) => {
-            return error ? reject(error) : resolve(result)
-        })
-    })
+async function delete_ (table, id) {
+  return await table.update({ is_deleted: true }, { where: { id } })
 }
 
-function eliminar(tabla, id){
-    return new Promise((resolve, reject) => {
-        conexion.query(`UPDATE ${tabla} SET is_deleted = TRUE WHERE id = ${id}`, (error, result) => {
-            return error ? reject(error) : resolve(result);
-        });
-    });
+async function recover (table, id) {
+  return await table.update({ is_deleted: false }, { where: { id } })
 }
 
-function recuperar(tabla, id){
-    return new Promise((resolve, reject) => {
-        conexion.query(`UPDATE ${tabla} SET is_deleted = FALSE WHERE id = ${id}`, (error, result) => {
-            return error ? reject(error) : resolve(result);
-        });
-    });
+async function add (table, data) {
+  return await table.upsert(data)
 }
-
-function agregar(tabla, data){
-    return new Promise((resolve, reject) => {
-        conexion.query(`INSERT INTO ${tabla} SET ? ON DUPLICATE KEY UPDATE ?`, [data, data], (error, result) => {
-            return error ? reject(error) : resolve(result);
-        });
-    });
-}
-
 
 module.exports = {
-    todos,
-    uno,
-    eliminar,
-    recuperar,
-    agregar,
+  sequelize,
+  User,
+  Task,
+  findAll,
+  findOne,
+  query,
+  delete_,
+  recover,
+  add
 }
