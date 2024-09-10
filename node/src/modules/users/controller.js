@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt')
-const auth = require('../../auth')
+const auth = require('../../auth/index')
 
 module.exports = function (bdInyectada) {
   let db = bdInyectada
@@ -10,6 +10,7 @@ module.exports = function (bdInyectada) {
 
   async function login (email, password) {
     const user = await db.query(TABLA, { email })
+    console.log(user)
     if (!user) throw new Error('Usuario no encontrado')
 
     const isMatch = await bcrypt.compare(password, user.password)
@@ -35,10 +36,14 @@ module.exports = function (bdInyectada) {
   }
 
   async function agregar (body) {
-    if (body.password) {
-      body.password = await bcrypt.hash(body.password.toString(), 10)
+    const userData = {
+      ...body,
+      role_id: 1
     }
-    return db.add(TABLA, body)
+    if (userData.password) {
+      userData.password = await bcrypt.hash(userData.password.toString(), 10)
+    }
+    return db.add(TABLA, userData)
   }
 
   return {

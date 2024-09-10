@@ -1,9 +1,9 @@
 function error (message, code) {
-    let err = new Error(message)
+  const err = new Error(message)
 
-    code ? err.statusCode = code : ''
+  code ? err.statusCode = code : err.statusCode = ''
 
-    return err
+  return err
 }
 
 module.exports = error

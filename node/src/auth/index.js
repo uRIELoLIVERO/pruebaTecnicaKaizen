@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const config = require('../config')
+const error = require('../middleware/errors')
 
 const secret = config.jwt.secret
 
@@ -11,24 +12,27 @@ function verificarToken (token) {
   try {
     return jwt.verify(token, secret)
   } catch (error) {
-    throw new Error('Token inválido')
+    throw error('Token inválido', 401)
   }
 }
 
 const chequearToken = {
-  confirmarToken: function (req) {
+  confirmarToken: function (req, idParam) {
     const decodificado = decodificarCabecera(req)
-    if (decodificado.id !== parseInt(req.params.id)) {
-      throw new Error('No tienes acceso')
+
+    if (idParam !== undefined) {
+      if (decodificado.id !== parseInt(idParam)) {
+        throw error('No tienes acceso', 403)
+      }
     }
+
+    return decodificado
   }
 }
 
 function obtenerToken (autorizacion) {
-  if (!autorizacion) throw new Error('Token no enviado')
-
-  if (autorizacion.indexOf('Bearer') === -1) throw new Error('Formato invalido')
-
+  if (!autorizacion) throw error('Token no enviado', 401)
+  if (autorizacion.indexOf('Bearer') === -1) throw error('Formato invalido', 401)
   const token = autorizacion.replace('Bearer ', '')
   return token
 }
@@ -37,9 +41,7 @@ function decodificarCabecera (req) {
   const autorizacion = req.headers.authorization || ''
   const token = obtenerToken(autorizacion)
   const decodificado = verificarToken(token)
-
   req.user = decodificado
-
   return decodificado
 }
 

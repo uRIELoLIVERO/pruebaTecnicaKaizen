@@ -1,5 +1,5 @@
 const express = require('express')
-const verificacion = require('./verificacion.js')
+const { authenticateToken } = require('../../middleware/verificacion')
 const respuesta = require('../../red/respuestas')
 const controller = require('./index')
 
@@ -7,8 +7,8 @@ const router = express.Router()
 
 router.get('/', todos)
 router.get('/:id', uno)
-router.put('/:id', verificacion(), eliminar)
-router.put('/recuperar/:id', recuperar)
+router.put('/:id', authenticateToken(), eliminar)
+router.put('/recuperar/:id', authenticateToken(), recuperar)
 router.post('/register', agregar)
 router.post('/login', login)
 
