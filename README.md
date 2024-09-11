@@ -32,43 +32,45 @@ Esta es una aplicación web de gestión de tareas que permite a los usuarios reg
 
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/usuario/task-management-app.git
-   cd task-management-app
+   git clone https://github.com/uRIELoLIVERO/pruebaTecnicaKaizen.git
+   cd pruebaTecnicaKaizen
    ```
 2. Instalar dependencias tanto en el frontend como en el backend:
 
     ```bash
-    # En la raíz del proyecto
+    cd ./node
     npm install
-    cd client
+    cd ../TasklistWUsers
     npm install
     ```
 
 
-3. Configurar variables de entorno: Crea un archivo .env en la raíz del proyecto con las siguientes variables:
+3. Configurar variables de entorno: Crea un archivo .env en el backend, en la carpeta node con las siguientes variables:
 
     ```bash
-    DB_HOST=localhost
-    DB_USER=root
-    DB_PASSWORD=tu_contraseña
-    DB_NAME=task_management_db
-    JWT_SECRET=tu_secreto_jwt
+    PORT = 4000
+    MYSQL_HOST = localhost
+    MYSQL_USER = root
+    MYSQL_PASSWORD =
+    MYSQL_DB = example
     ```
 
 4. Crear y configurar la base de datos: En tu instancia de MySQL, ejecuta los siguientes comandos para crear la base de datos:
 
     ```sql
-    CREATE DATABASE task_management_db;
+    CREATE DATABASE example;
     ```
 
 5. Ejecutar las migraciones de Sequelize:
 
     ```bash
-    npx sequelize-cli db:migrate
+    # En la carpeta node
+    sequelize-cli db:migrate
     ```
 
 6. Poblar la base de datos con datos iniciales:
     ```bash
+    # En la carpeta node
     npm run seed
     ```
     Este comando ejecutará el script seedDatabase.js, que creará roles predefinidos, un usuario administrador, un usuario estándar y algunas tareas de ejemplo.
@@ -76,14 +78,15 @@ Esta es una aplicación web de gestión de tareas que permite a los usuarios reg
 
     ```bash
     # En la raíz del proyecto
+    cd ./node
     npm run dev
     ```
 
 8. Iniciar el cliente:
 
     ```bash
-    cd client
-    npm start
+    cd ../TasklistWUsers
+    npm run dev
     ```
 
 ## Uso
