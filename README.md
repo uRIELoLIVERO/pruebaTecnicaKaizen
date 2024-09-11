@@ -85,6 +85,7 @@ Esta es una aplicación web de gestión de tareas que permite a los usuarios reg
 8. Iniciar el cliente:
 
     ```bash
+    # Desde la carpeta node
     cd ../TasklistWUsers
     npm run dev
     ```
