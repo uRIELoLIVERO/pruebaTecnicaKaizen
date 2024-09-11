@@ -12,6 +12,7 @@ router.put('/my-tasks/update', authenticateToken(), autorizacion('update_own_tas
 router.put('/my-tasks', authenticateToken(), autorizacion('delete_own_task'), eliminarPropia)
 
 // Rutas para administradores
+// no implementadas
 router.get('/all-tasks', authenticateToken(), autorizacion('list_all_tasks'), todos)
 router.get('/tasks/:id', authenticateToken(), autorizacion('read_any_task'), uno)
 router.put('/tasks/:id', authenticateToken(), autorizacion('delete_any_task'), eliminar)
